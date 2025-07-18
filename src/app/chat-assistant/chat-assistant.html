@@ -1,1 +1,15 @@
-<p>chat-assistant works!</p>
+<div class="chat-header">
+  <img src="assets/logo.svg" alt="Logo" class="chat-logo" />
+  <span>{{ chatHeader }}</span>
+</div>
+
+<div class="chat-box">
+  <div *ngFor="let msg of chatHistory" class="chat-message" [ngClass]="msg.sender">
+    <div class="bubble">{{ msg.message }}</div>
+  </div>
+</div>
+
+<form class="chat-input" (submit)="sendMessage()">
+  <input [(ngModel)]="userMessage" name="message" placeholder="Type your message..." />
+  <button type="submit">Send</button>
+</form>

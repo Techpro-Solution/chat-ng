@@ -1,10 +1,12 @@
 import { Component } from '@angular/core';
-import {ChatLauncherComponent} from './launcher/ chat-launcher.component';
+import {ChatLauncher} from './chatLauncher/chat-launcher';
+import {CommonModule} from '@angular/common';
+import { HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [ChatLauncherComponent],
+  imports: [ChatLauncher, CommonModule, HttpClientModule,],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

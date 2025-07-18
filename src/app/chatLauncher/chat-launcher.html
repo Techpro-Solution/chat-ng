@@ -1,0 +1,10 @@
+<!-- Floating + Icon Button -->
+<div class="chat-launcher-button" (click)="toggleChat()">
+  <span *ngIf="!showChat">+</span>
+  <span *ngIf="showChat">×</span>
+</div>
+
+<!-- Floating Chat Assistant Panel -->
+<div class="chat-float" *ngIf="showChat">
+  <app-chat />
+</div>

@@ -30,6 +30,17 @@
               "sourceMap": false,
               "namedChunks": false,
               "buildOptimizer": true
+            },
+            "development": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "sourceMap": true,
+              "namedChunks": true,
+              "aot": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "watch": true,
+              "outputHashing": "none"
             }
           }
         },

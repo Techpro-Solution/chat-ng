@@ -1,0 +1,9 @@
+{
+  "chatHeader": "AI Assistant",
+  "welcomeMessages": [
+    "Hi there! How can I help you today?",
+    "Welcome! What would you like to know?",
+    "Hello! I’m your assistant.",
+    "Ask me anything!"
+  ]
+}
