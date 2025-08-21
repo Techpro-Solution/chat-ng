@@ -1,13 +1,15 @@
 import { Injectable } from '@angular/core';
 import { of } from 'rxjs';
 import { delay } from 'rxjs/operators';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
-  constructor() {}
+  constructor(private http: HttpClient) {}
 
+  private  sessioniD= "some sesion id"
   private responses = [
     "That's a great question!",
     "Let me find that out for you.",
@@ -20,9 +22,17 @@ export class ApiService {
   ];
 
   getAssistantReplies(userMessage: string) {
-    const numReplies = Math.floor(Math.random() * 4) + 1; // 1 to 4
-    const shuffled = this.responses.sort(() => 0.5 - Math.random());
-    const replies = shuffled.slice(0, numReplies);
-    return of(replies).pipe(delay(800));
+    const payload = {
+      message : "this is meesage",
+      sessionid : this.sessioniD,
+      source: "portal"
+    }
+    const  headers = new HttpHeaders().set("xkey","somekey")
+
+    return this.http.post<any>(
+      "http:www.postman.com",
+      payload,{headers}
+    )
+
   }
 }

@@ -1,0 +1,264 @@
+.chat-assistant-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 16px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Response Message Styles */
+.response-message {
+  margin-bottom: 20px;
+}
+
+.message-bubble {
+  background: #f5f5f5;
+  border-radius: 18px;
+  padding: 12px 16px;
+  max-width: 80%;
+  word-wrap: break-word;
+}
+
+.message-bubble p {
+  margin: 0;
+  line-height: 1.4;
+  color: #333;
+}
+
+/* Section Titles */
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #2c3e50;
+}
+
+/* CTA Buttons Section */
+.cta-section {
+  margin-bottom: 24px;
+}
+
+.cta-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cta-button {
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.cta-button:hover {
+  background: #0056b3;
+}
+
+.cta-button:active {
+  transform: translateY(1px);
+}
+
+/* Video Section */
+.video-section {
+  margin-bottom: 24px;
+}
+
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.video-item {
+  cursor: pointer;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.2s ease;
+  border: 1px solid #e0e0e0;
+}
+
+.video-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.video-thumbnail {
+  position: relative;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-align: center;
+  padding: 16px;
+}
+
+.play-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.video-name {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Video Modal */
+.video-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.video-modal-content {
+  background: white;
+  border-radius: 12px;
+  max-width: 90%;
+  max-height: 90%;
+  width: 800px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.video-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.video-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 18px;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.close-button:hover {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.video-container {
+  position: relative;
+  width: 100%;
+  height: 450px;
+  background: #000;
+}
+
+.video-container iframe,
+.video-container video {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Usage Information */
+.usage-info {
+  margin-top: 20px;
+  font-size: 12px;
+  color: #666;
+}
+
+.usage-details {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.usage-details summary {
+  padding: 8px 12px;
+  background: #f8f9fa;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.usage-details summary:hover {
+  background: #e9ecef;
+}
+
+.usage-content {
+  padding: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.usage-item {
+  font-size: 11px;
+  color: #666;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+}
+
+.empty-state p {
+  margin: 0;
+  font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .chat-assistant-container {
+    padding: 12px;
+  }
+
+  .video-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .video-modal-content {
+    margin: 20px;
+    max-width: calc(100% - 40px);
+  }
+
+  .video-container {
+    height: 300px;
+  }
+
+  .cta-buttons {
+    flex-direction: column;
+  }
+
+  .cta-button {
+    width: 100%;
+    text-align: center;
+  }
+
+  .usage-content {
+    flex-direction: column;
+    gap: 8px;
+  }
+}

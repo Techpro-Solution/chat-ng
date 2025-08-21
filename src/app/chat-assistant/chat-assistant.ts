@@ -39,9 +39,9 @@ export class Chat implements OnInit {
 
     // Call ApiService for bot replies
     this.api.getAssistantReplies(trimmed).subscribe(replies => {
-      replies.forEach(reply => {
-        this.chatHistory.push({ sender: 'bot', message: reply });
-      });
+      const botmessage = typeof  replies ==="object" && replies.message ? replies.message :
+        JSON.stringify(replies.message);
+      this.chatHistory.push({sender: "bot",message: botmessage})
     });
 
     this.userMessage = '';

@@ -1,0 +1,90 @@
+<div class="chat-assistant-container" *ngIf="hasContent()">
+  <!-- Main Response Message -->
+  <div class="response-message" *ngIf="chatResponse.response">
+    <div class="message-bubble">
+      <p>{{ chatResponse.response }}</p>
+    </div>
+  </div>
+
+  <!-- CTA Buttons Section -->
+  <div class="cta-section" *ngIf="getCTAItems().length > 0">
+    <h4 class="section-title">Suggested Actions</h4>
+    <div class="cta-buttons">
+      <button
+        *ngFor="let cta of getCTAItems()"
+        class="cta-button"
+        (click)="onCTAClick(cta)">
+        {{ cta.name }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Video Links Section -->
+  <div class="video-section" *ngIf="getVideoLinks().length > 0">
+    <h4 class="section-title">Related Videos</h4>
+    <div class="video-grid">
+      <div
+        *ngFor="let video of getVideoLinks()"
+        class="video-item"
+        (click)="onVideoClick(video)">
+        <div class="video-thumbnail">
+          <i class="play-icon">▶</i>
+          <span class="video-name">{{ video.name }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Usage Information (Optional) -->
+  <div class="usage-info" *ngIf="chatResponse.usages">
+    <details class="usage-details">
+      <summary>Usage Details</summary>
+      <div class="usage-content">
+        <span class="usage-item">Input Tokens: {{ chatResponse.usages.inputtoken }}</span>
+        <span class="usage-item">Output Tokens: {{ chatResponse.usages.outputtikem }}</span>
+        <span class="usage-item">Cost: ${{ chatResponse.usages.cost }}</span>
+        <span class="usage-item">Duration: {{ chatResponse.usages.duration }}ms</span>
+        <span class="usage-item" *ngIf="chatResponse.usages.isEstimated">
+          <em>(Estimated)</em>
+        </span>
+      </div>
+    </details>
+  </div>
+
+  <!-- Video Player Modal -->
+  <div class="video-modal" *ngIf="showVideoPlayer && selectedVideo" (click)="closeVideoPlayer()">
+    <div class="video-modal-content" (click)="$event.stopPropagation()">
+      <div class="video-header">
+        <h3>{{ selectedVideo.name }}</h3>
+        <button class="close-button" (click)="closeVideoPlayer()">&times;</button>
+      </div>
+      <div class="video-container">
+        <!-- YouTube iframe for YouTube videos -->
+        <iframe
+          *ngIf="isYouTubeVideo(selectedVideo.value)"
+          [src]="getYouTubeEmbedUrl(selectedVideo.value)"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen>
+        </iframe>
+
+        <!-- Regular video tag for other video formats -->
+        <video
+          *ngIf="!isYouTubeVideo(selectedVideo.value)"
+          controls
+          width="100%"
+          height="100%">
+          <source [src]="selectedVideo.value" type="video/mp4">
+          <source [src]="selectedVideo.value" type="video/webm">
+          <source [src]="selectedVideo.value" type="video/ogg">
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Empty State -->
+<div class="empty-state" *ngIf="!hasContent()">
+  <p>No response available</p>
+</div>
