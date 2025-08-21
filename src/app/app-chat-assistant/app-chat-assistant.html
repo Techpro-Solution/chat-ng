@@ -1,54 +1,135 @@
-<div class="chat-assistant-container" *ngIf="hasContent()">
-  <!-- Main Response Message -->
-  <div class="response-message" *ngIf="chatResponse.response">
-    <div class="message-bubble">
-      <p>{{ chatResponse.response }}</p>
+<div class="chat-assistant-container">
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="messages.length === 0 && !isLoading">
+    <div class="empty-content">
+      <h3>👋 Welcome to Chat Assistant</h3>
+      <p>Start a conversation by typing a message below!</p>
     </div>
   </div>
 
-  <!-- CTA Buttons Section -->
-  <div class="cta-section" *ngIf="getCTAItems().length > 0">
-    <h4 class="section-title">Suggested Actions</h4>
-    <div class="cta-buttons">
-      <button
-        *ngFor="let cta of getCTAItems()"
-        class="cta-button"
-        (click)="onCTAClick(cta)">
-        {{ cta.name }}
-      </button>
-    </div>
-  </div>
+  <!-- Chat Messages -->
+  <div class="chat-messages" #chatMessages>
+    <div *ngFor="let message of messages" class="message-wrapper">
+      <!-- User Message -->
+      <div *ngIf="message.isUser" class="user-message">
+        <div class="message-bubble user-bubble">
+          <p>{{ message.message }}</p>
+          <span class="timestamp">{{ formatTime(message.timestamp) }}</span>
+        </div>
+      </div>
 
-  <!-- Video Links Section -->
-  <div class="video-section" *ngIf="getVideoLinks().length > 0">
-    <h4 class="section-title">Related Videos</h4>
-    <div class="video-grid">
-      <div
-        *ngFor="let video of getVideoLinks()"
-        class="video-item"
-        (click)="onVideoClick(video)">
-        <div class="video-thumbnail">
-          <i class="play-icon">▶</i>
-          <span class="video-name">{{ video.name }}</span>
+      <!-- Assistant Message -->
+      <div *ngIf="!message.isUser && message.response" class="assistant-message">
+        <div class="message-bubble assistant-bubble">
+          <p>{{ message.response.response }}</p>
+          <span class="timestamp">{{ formatTime(message.timestamp) }}</span>
+        </div>
+
+        <!-- CTA Buttons Section -->
+        <div class="cta-section" *ngIf="getCTAItemsFromMessage(message.response).length > 0">
+          <h4 class="section-title">Suggested Actions</h4>
+          <div class="cta-buttons">
+            <button
+              *ngFor="let cta of getCTAItemsFromMessage(message.response)"
+              class="cta-button"
+              (click)="onCTAClick(cta)">
+              {{ cta.name }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Video Links Section -->
+        <div class="video-section" *ngIf="getVideoLinksFromMessage(message.response).length > 0">
+          <h4 class="section-title">Related Videos</h4>
+          <div class="video-grid">
+            <div
+              *ngFor="let video of getVideoLinksFromMessage(message.response)"
+              class="video-item"
+              (click)="onVideoClick(video)">
+              <div class="video-thumbnail">
+                <i class="play-icon">▶</i>
+                <span class="video-name">{{ video.name }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Usage Information (Optional) -->
+        <div class="usage-info" *ngIf="message.response.usages && showUsageInfo">
+          <details class="usage-details">
+            <summary>Usage Details</summary>
+            <div class="usage-content">
+              <span class="usage-item">Input Tokens: {{ message.response.usages.inputtoken }}</span>
+              <span class="usage-item">Output Tokens: {{ message.response.usages.outputtikem }}</span>
+              <span class="usage-item">Cost: ${{ message.response.usages.cost.toFixed(4) }}</span>
+              <span class="usage-item">Duration: {{ message.response.usages.duration }}ms</span>
+              <span class="usage-item" *ngIf="message.response.usages.isEstimated">
+                <em>(Estimated)</em>
+              </span>
+            </div>
+          </details>
         </div>
       </div>
     </div>
+
+    <!-- Loading indicator -->
+    <div *ngIf="isLoading" class="loading-message">
+      <div class="message-bubble assistant-bubble">
+        <div class="typing-indicator">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <span class="loading-text">Thinking...</span>
+      </div>
+    </div>
   </div>
 
-  <!-- Usage Information (Optional) -->
-  <div class="usage-info" *ngIf="chatResponse.usages">
-    <details class="usage-details">
-      <summary>Usage Details</summary>
-      <div class="usage-content">
-        <span class="usage-item">Input Tokens: {{ chatResponse.usages.inputtoken }}</span>
-        <span class="usage-item">Output Tokens: {{ chatResponse.usages.outputtikem }}</span>
-        <span class="usage-item">Cost: ${{ chatResponse.usages.cost }}</span>
-        <span class="usage-item">Duration: {{ chatResponse.usages.duration }}ms</span>
-        <span class="usage-item" *ngIf="chatResponse.usages.isEstimated">
-          <em>(Estimated)</em>
-        </span>
+  <!-- Chat Controls -->
+  <div class="chat-controls" *ngIf="messages.length > 0">
+    <button (click)="clearChat()" class="control-button" title="Clear Chat">
+      🗑️ Clear
+    </button>
+    <button (click)="retryLastMessage()" class="control-button" title="Retry Last Message" [disabled]="isLoading">
+      🔄 Retry
+    </button>
+    <button (click)="toggleUsageInfo()" class="control-button" title="Toggle Usage Info" [class.active]="showUsageInfo">
+      📊 Usage
+    </button>
+  </div>
+
+  <!-- Chat Input Section -->
+  <div class="chat-input-section">
+    <div class="input-wrapper">
+      <input
+        #messageInput
+        type="text"
+        [(ngModel)]="currentMessage"
+        (keyup.enter)="sendMessage()"
+        (input)="onInputChange()"
+        placeholder="Type your message..."
+        class="message-input"
+        [disabled]="isLoading"
+        autocomplete="off">
+
+      <!-- Auto-completion suggestions -->
+      <div class="suggestions" *ngIf="suggestions.length > 0">
+        <div
+          *ngFor="let suggestion of suggestions"
+          class="suggestion-item"
+          (click)="selectSuggestion(suggestion)">
+          {{ suggestion }}
+        </div>
       </div>
-    </details>
+    </div>
+
+    <button
+      (click)="sendMessage()"
+      [disabled]="!currentMessage.trim() || isLoading"
+      class="send-button">
+      <span *ngIf="!isLoading">Send</span>
+      <span *ngIf="isLoading" class="loading-spinner">⟳</span>
+    </button>
   </div>
 
   <!-- Video Player Modal -->
@@ -82,9 +163,4 @@
       </div>
     </div>
   </div>
-</div>
-
-<!-- Empty State -->
-<div class="empty-state" *ngIf="!hasContent()">
-  <p>No response available</p>
 </div>

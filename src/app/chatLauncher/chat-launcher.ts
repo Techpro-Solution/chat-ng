@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Chat } from '../chat-assistant/chat-assistant';
 import { HttpClientModule } from '@angular/common/http';
-import { ChatAssistantComponent, ChatAssistantResponse } from '../app-chat-assistant/app-chat-assistant';
+import {ChatAssistantComponent} from '../app-chat-assistant/app-chat-assistant';
+import {ChatAssistantResponse} from '../app-chat-assistant/ChatAssistantService';
 
 @Component({
   selector: 'app-chat-launcher',
   standalone: true,
-  imports: [Chat, CommonModule, HttpClientModule, ChatAssistantComponent],
+  imports:  [CommonModule, HttpClientModule, ChatAssistantComponent],
   templateUrl: './chat-launcher.html',
   styleUrls: ['./chat-launcher.scss']
 })
