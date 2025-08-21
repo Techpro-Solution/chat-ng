@@ -22,15 +22,15 @@ export class ChatLauncher {
         "cta": [
           {
             "name": "Get Help",
-            "value": "help_action"
+            "value": "https://www.google.com"
           },
           {
             "name": "Contact Support",
-            "value": "support_action"
+            "value": "https://www.google.com"
           },
           {
             "name": "View Documentation",
-            "value": "docs_action"
+            "value": "https://www.google.com"
           }
         ]
       },
@@ -38,11 +38,11 @@ export class ChatLauncher {
         "videoLinks": [
           {
             "name": "Getting Started Tutorial",
-            "value": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+            "value": "https://www.youtube.com/watch?v=vpyZ7cituNc"
           },
           {
             "name": "Advanced Features",
-            "value": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+            "value": "https://www.youtube.com/watch?v=vpyZ7cituNc"
           }
         ]
       }

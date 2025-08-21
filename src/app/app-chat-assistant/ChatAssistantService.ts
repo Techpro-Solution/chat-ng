@@ -302,9 +302,9 @@ export class ChatAssistantService {
     }
 
     // // For development/testing, you might want to enable mock responses
-    // if (this.shouldUseMockResponse()) {
-    //   return this.getMockResponse(originalMessage);
-    // }
+    if (this.shouldUseMockResponse()) {
+      return this.getMockResponse(originalMessage);
+    }
 
     return of({
       response: errorMessage,

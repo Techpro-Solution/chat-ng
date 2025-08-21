@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {ChatAssistantService, CTAItem, VideoLink, ChatMessage, ChatAssistantResponse} from './ChatAssistantService';
 import {debounceTime, distinctUntilChanged, Subject, takeUntil} from 'rxjs';
+import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
 
 @Component({
   selector: 'app-chat-assistant',
@@ -30,7 +31,7 @@ export class ChatAssistantComponent implements OnInit, OnDestroy {
   selectedVideo: VideoLink | null = null;
   showVideoPlayer = false;
 
-  constructor(private chatService: ChatAssistantService) {
+  constructor(private chatService: ChatAssistantService,private domSanitizer: DomSanitizer) {
     // Setup auto-completion
     this.inputSubject.pipe(
       debounceTime(300),
@@ -232,14 +233,24 @@ export class ChatAssistantComponent implements OnInit, OnDestroy {
   }
 
   // Helper method to check if URL is a YouTube video
+
+
+  // Get YouTube embed URL
+  // Helper method to check if URL is a YouTube video
   isYouTubeVideo(url: string): boolean {
     return url.includes('youtube.com') || url.includes('youtu.be');
   }
 
-  // Get YouTube embed URL
-  getYouTubeEmbedUrl(url: string): string {
+  // Get YouTube embed URL - now returns SafeResourceUrl
+  getYouTubeEmbedUrl(url: string): SafeResourceUrl {
     const videoId = this.extractYouTubeVideoId(url);
-    return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
+    const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}` : url;
+    return this.domSanitizer.bypassSecurityTrustResourceUrl(embedUrl);
+  }
+
+  // Get safe video URL for non-YouTube videos
+  getSafeVideoUrl(url: string): SafeResourceUrl {
+    return this.domSanitizer.bypassSecurityTrustResourceUrl(url);
   }
 
   private extractYouTubeVideoId(url: string): string | null {
@@ -247,4 +258,16 @@ export class ChatAssistantComponent implements OnInit, OnDestroy {
     const match = url.match(regex);
     return match ? match[1] : null;
   }
+
+  // Additional method to get safe URL for any video type
+  getSafeVideoUrlForModal(): SafeResourceUrl | null {
+    if (!this.selectedVideo) return null;
+
+    if (this.isYouTubeVideo(this.selectedVideo.value)) {
+      return this.getYouTubeEmbedUrl(this.selectedVideo.value);
+    } else {
+      return this.getSafeVideoUrl(this.selectedVideo.value);
+    }
+  }
+  // Get YouTube embed URL - now returns SafeResourceUrl
 }
