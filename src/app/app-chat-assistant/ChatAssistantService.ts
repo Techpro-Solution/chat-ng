@@ -32,23 +32,26 @@ export interface ChatMessage {
   isUser: boolean;
   timestamp: Date;
   response?: ChatAssistantResponse;
+  // Message parts for pipe-separated content
+  messageParts?: string[];
 }
 
 export interface ChatAssistantResponse {
   response: string;
-  message?: string; // Alternative field name for response
+  message?: string;
   CTAResponse?: CTAResponse[];
   usages?: Usages;
+  // Response parts for pipe-separated content
+  responseParts?: string[];
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChatAssistantService {
-  private apiUrl = ' http://localhost:3000/api'; // Replace with your actual API URL
+  private apiUrl = ' http://localhost:3000/api';
   private sessionId: string;
 
-  // Add missing observables for message and loading state
   private messagesSubject = new BehaviorSubject<ChatMessage[]>([]);
   private loadingSubject = new BehaviorSubject<boolean>(false);
 
@@ -65,7 +68,6 @@ export class ChatAssistantService {
   sendMessage(message: string): Observable<ChatAssistantResponse> {
     this.loadingSubject.next(true);
 
-    // Add user message to the list
     const userMessage: ChatMessage = {
       id: this.generateMessageId(),
       message,
@@ -78,13 +80,17 @@ export class ChatAssistantService {
 
     return this.getAssistantReplies(message).pipe(
       tap(response => {
-        // Add assistant response to the list
+        // Ensure we split the response by pipe
+        const messageParts = this.splitMessageByPipe(response.response);
+
         const assistantMessage: ChatMessage = {
           id: this.generateMessageId(),
           message: response.response,
           isUser: false,
           timestamp: new Date(),
-          response
+          response,
+          // Always set messageParts from the response
+          messageParts: messageParts
         };
 
         const updatedMessages = this.messagesSubject.value;
@@ -99,8 +105,24 @@ export class ChatAssistantService {
   }
 
   /**
+   * Split message content by pipe separator - IMPROVED
+   */
+  private splitMessageByPipe(message: string): string[] {
+    if (!message || typeof message !== 'string') return [];
+
+    // Split by pipe and clean up each part
+    const parts = message.split('|')
+      .map(part => part.trim())
+      .filter(part => part.length > 0);
+
+    console.log('Original message:', message);
+    console.log('Split into parts:', parts);
+
+    return parts;
+  }
+
+  /**
    * Main method to get assistant replies
-   * This method handles both the original simple format and the new enhanced format
    */
   getAssistantReplies(message: string): Observable<ChatAssistantResponse> {
     const headers = this.getHttpHeaders();
@@ -109,7 +131,6 @@ export class ChatAssistantService {
       message: message,
       sessionId: this.sessionId,
       timestamp: new Date().toISOString(),
-      // Add any additional context your API might need
       context: {
         userAgent: navigator.userAgent,
         timestamp: Date.now()
@@ -123,23 +144,28 @@ export class ChatAssistantService {
   }
 
   /**
-   * Get auto-completion suggestions
+   * Get auto-completion suggestions - IMPROVED
    */
   getChatCompletions(partialMessage: string): Observable<string[]> {
+    // Don't make API calls for very short messages
+    if (!partialMessage || partialMessage.length <= 2) {
+      return of([]);
+    }
+
     const headers = this.getHttpHeaders();
 
     const payload = {
       message: partialMessage,
       sessionId: this.sessionId,
-      source:"portal",
-      playType:"Basic Option"
+      source: "portal",
+      playType: "Basic Option"
     };
 
     return this.http.post<string[]>(`http://localhost:4200/autocomplete`, payload, { headers }).pipe(
       catchError(error => {
         console.warn('Auto-completion failed:', error);
-        // Return mock suggestions as fallback
-        return this.getMockSuggestions(partialMessage);
+        // Return empty array instead of mock suggestions to avoid unwanted suggestions
+        return of([]);
       })
     );
   }
@@ -196,13 +222,11 @@ export class ChatAssistantService {
     return this.http.delete(`${this.apiUrl}/session/${this.sessionId}`, { headers }).pipe(
       map(() => {
         this.sessionId = this.generateSessionId();
-        // Clear messages when session is cleared
         this.messagesSubject.next([]);
         return { success: true };
       }),
       catchError(error => {
         console.warn('Session clear failed:', error);
-        // Generate new session ID anyway
         this.sessionId = this.generateSessionId();
         this.messagesSubject.next([]);
         return of({ success: true, warning: 'Session cleared locally only' });
@@ -232,31 +256,37 @@ export class ChatAssistantService {
   }
 
   /**
-   * Normalize different API response formats into a consistent structure
+   * Normalize different API response formats into a consistent structure - IMPROVED
    */
   private normalizeApiResponse(response: any): ChatAssistantResponse {
-    // Handle various possible response formats
     if (typeof response === 'string') {
+      const responseParts = this.splitMessageByPipe(response);
       return {
         response: response,
         CTAResponse: [],
-        usages: this.getDefaultUsages()
+        usages: this.getDefaultUsages(),
+        responseParts: responseParts
       };
     }
 
     if (response && typeof response === 'object') {
+      const responseText = response.response || response.message || response.reply || JSON.stringify(response);
+      const responseParts = this.splitMessageByPipe(responseText);
+
       return {
-        response: response.response || response.message || response.reply || JSON.stringify(response),
+        response: responseText,
         CTAResponse: response.CTAResponse || response.ctaResponse || response.actions || [],
-        usages: response.usages || response.usage || this.getDefaultUsages()
+        usages: response.usages || response.usage || this.getDefaultUsages(),
+        responseParts: responseParts
       };
     }
 
-    // Fallback for unexpected formats
+    const fallbackMessage = 'I received an unexpected response format. Please try again.';
     return {
-      response: 'I received an unexpected response format. Please try again.',
+      response: fallbackMessage,
       CTAResponse: [],
-      usages: this.getDefaultUsages()
+      usages: this.getDefaultUsages(),
+      responseParts: [fallbackMessage]
     };
   }
 
@@ -276,7 +306,6 @@ export class ChatAssistantService {
       }
     ];
 
-    // Customize error messages based on error type
     if (error.status === 0) {
       errorMessage = 'Unable to connect to the server. Please check your internet connection.';
     } else if (error.status === 429) {
@@ -301,7 +330,6 @@ export class ChatAssistantService {
       ];
     }
 
-    // // For development/testing, you might want to enable mock responses
     if (this.shouldUseMockResponse()) {
       return this.getMockResponse(originalMessage);
     }
@@ -309,17 +337,18 @@ export class ChatAssistantService {
     return of({
       response: errorMessage,
       CTAResponse: ctaResponse,
-      usages: this.getDefaultUsages()
+      usages: this.getDefaultUsages(),
+      responseParts: [errorMessage]
     });
   }
 
   /**
-   * Get mock response for development/testing
+   * Get mock response for development/testing - UPDATED WITH BETTER PIPE EXAMPLES
    */
   private getMockResponse(message: string): Observable<ChatAssistantResponse> {
     const mockResponses: ChatAssistantResponse[] = [
       {
-        response: `I understand you said: "${message}". This is a mock response for development purposes.`,
+        response: `I understand you said: "${message}". This is a mock response for development purposes.|1. This is a mock response for part 2 purposes.|2. This is a mock response for part 3 purposes with <a href="https://www.w3schools.com">Visit W3Schools.com!</a>`,
         CTAResponse: [
           {
             cta: [
@@ -337,7 +366,7 @@ export class ChatAssistantService {
         }
       },
       {
-        response: `That's an interesting question about "${message}". Here's what I think...`,
+        response: `That's an interesting question about "${message}". Here's what I think...|Additional details about your question with more information.|Final thoughts and recommendations for your consideration.|Here's a bonus tip that might help you further.`,
         CTAResponse: [
           {
             cta: [
@@ -362,25 +391,14 @@ export class ChatAssistantService {
 
     const randomResponse = mockResponses[Math.floor(Math.random() * mockResponses.length)];
 
+    // Ensure responseParts are properly set
+    randomResponse.responseParts = this.splitMessageByPipe(randomResponse.response);
+
+    console.log('Mock response generated:', randomResponse);
+    console.log('Response parts:', randomResponse.responseParts);
+
     return of(randomResponse).pipe(
-      delay(Math.random() * 1000 + 500) // Simulate network delay
-    );
-  }
-
-  /**
-   * Get mock auto-completion suggestions
-   */
-  private getMockSuggestions(partialMessage: string): Observable<string[]> {
-    const suggestions = [
-      `${partialMessage} and how does it work?`,
-      `${partialMessage} with examples`,
-      `${partialMessage} step by step guide`,
-      `${partialMessage} best practices`,
-      `${partialMessage} troubleshooting`
-    ];
-
-    return of(suggestions.slice(0, 3)).pipe(
-      delay(200)
+      delay(Math.random() * 1000 + 500)
     );
   }
 
@@ -388,11 +406,10 @@ export class ChatAssistantService {
    * Check if mock responses should be used (useful for development)
    */
   private shouldUseMockResponse(): boolean {
-    // You can control this via environment variables or local storage
     return localStorage.getItem('use_mock_responses') === 'true' ||
       !this.apiUrl.includes('production') ||
       this.apiUrl.includes('localhost') ||
-      this.apiUrl.includes('your-api-endpoint.com'); // Default placeholder URL
+      this.apiUrl.includes('your-api-endpoint.com');
   }
 
   /**
@@ -402,9 +419,6 @@ export class ChatAssistantService {
     return new HttpHeaders({
       'Content-Type': 'application/json',
       'X-Session-ID': this.sessionId,
-      // Add any other headers your API requires
-      // 'Authorization': 'Bearer ' + this.getAuthToken(),
-      // 'X-API-Key': 'your-api-key'
     });
   }
 

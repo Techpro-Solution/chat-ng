@@ -1,11 +1,19 @@
+/* Remove global styles and focus on component-specific solution */
 .chat-assistant-container {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  max-height: 100vh;
   max-width: 800px;
   margin: 0 auto;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: #f8f9fa;
+  overflow: hidden !important;
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
 }
 
 .empty-state {
@@ -84,6 +92,34 @@
   margin: 0 0 8px 0;
   line-height: 1.5;
   font-size: 15px;
+}
+
+/* Styles for multiple message bubbles from the same assistant response */
+.assistant-message .message-bubble + .message-bubble {
+  margin-top: 8px;
+}
+
+/* Remove the old message-part styles since we're using separate bubbles now */
+.message-part {
+  margin-bottom: 12px;
+  padding: 4px 0;
+}
+
+.message-part:last-child {
+  margin-bottom: 0;
+}
+
+.message-part p {
+  margin: 0 0 4px 0;
+  line-height: 1.5;
+  font-size: 15px;
+}
+
+.part-separator {
+  height: 1px;
+  background: linear-gradient(to right, transparent, #dee2e6, transparent);
+  margin: 8px 0;
+  opacity: 0.6;
 }
 
 .timestamp {
@@ -464,9 +500,63 @@
   border: none;
 }
 
+/* Smooth scrolling for chat messages */
+.chat-messages {
+  scroll-behavior: smooth;
+}
+
+/* Enhanced hover effects for interactive elements */
+.message-bubble:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.user-bubble:hover {
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+/* Focus states for accessibility */
+.cta-button:focus,
+.control-button:focus,
+.send-button:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+.message-input:focus {
+  outline: none;
+}
+
+/* Animation for new messages */
+@keyframes slideInMessage {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-wrapper {
+  animation: slideInMessage 0.3s ease-out;
+}
+
+/* Enhanced part separator with animation */
+.part-separator {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 0.6; }
+}
+
+/* Mobile-first responsive design improvements */
 @media (max-width: 768px) {
   .chat-assistant-container {
     height: 100vh;
+    overflow: hidden; /* Ensure no scrollbar on mobile either */
   }
 
   .chat-input-section {
@@ -506,13 +596,34 @@
     max-width: 90%;
   }
 
+  .assistant-message {
+    max-width: 95%;
+  }
+
   .chat-messages {
     padding: 16px;
+    gap: 12px;
+    overflow-y: auto; /* Ensure scrolling works on mobile */
+    overflow-x: hidden;
   }
 
   .chat-controls {
     padding: 12px 16px;
     flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .control-button {
+    flex: 1;
+    min-width: 80px;
+  }
+
+  .message-part {
+    margin-bottom: 8px;
+  }
+
+  .part-separator {
+    margin: 6px 0;
   }
 }
 
@@ -527,5 +638,92 @@
 
   .video-container {
     height: 200px;
+  }
+
+  .message-bubble {
+    padding: 12px 14px;
+  }
+
+  .chat-messages {
+    padding: 12px;
+  }
+
+  .chat-input-section {
+    padding: 12px;
+  }
+
+  .message-input {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  .send-button {
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+}
+
+/* Enhanced styling for better user experience */
+.chat-assistant-container {
+  position: relative;
+}
+
+/* Improved scrollbar styling for WebKit browsers - Only for chat messages */
+.chat-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Hide scrollbar for main container */
+.chat-assistant-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for Firefox */
+.chat-assistant-container {
+  scrollbar-width: none;
+}
+
+/* Ensure only chat-messages area is scrollable */
+.chat-messages {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Print styles */
+@media print {
+  .chat-controls,
+  .chat-input-section,
+  .video-section,
+  .cta-section {
+    display: none;
+  }
+
+  .chat-messages {
+    height: auto;
+    overflow: visible;
+  }
+
+  .message-bubble {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+
+  .user-bubble {
+    background: #f0f0f0 !important;
+    color: #000 !important;
   }
 }

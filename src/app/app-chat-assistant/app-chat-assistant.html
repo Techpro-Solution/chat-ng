@@ -1,3 +1,171 @@
+<!--<div class="chat-assistant-container">-->
+<!--  &lt;!&ndash; Empty State &ndash;&gt;-->
+<!--  <div class="empty-state" *ngIf="messages.length === 0 && !isLoading">-->
+<!--    <div class="empty-content">-->
+<!--      <h3>👋 Welcome to Chat Assistant</h3>-->
+<!--      <p>Start a conversation by typing a message below!</p>-->
+<!--    </div>-->
+<!--  </div>-->
+
+<!--  &lt;!&ndash; Chat Messages &ndash;&gt;-->
+<!--  <div class="chat-messages" #chatMessages>-->
+<!--    <div *ngFor="let message of messages" class="message-wrapper">-->
+<!--      &lt;!&ndash; User Message &ndash;&gt;-->
+<!--      <div *ngIf="message.isUser" class="user-message">-->
+<!--        <div class="message-bubble user-bubble">-->
+<!--          <p>{{ message.message }}</p>-->
+<!--          <span class="timestamp">{{ formatTime(message.timestamp) }}</span>-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; Assistant Message &ndash;&gt;-->
+<!--      <div *ngIf="!message.isUser && message.response" class="assistant-message">-->
+<!--        <div class="message-bubble assistant-bubble">-->
+<!--          <p [innerHTML]="getSafeHtml(message.response.response)"></p>-->
+<!--          <span class="timestamp">{{ formatTime(message.timestamp) }}</span>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; CTA Buttons Section &ndash;&gt;-->
+<!--        <div class="cta-section" *ngIf="getCTAItemsFromMessage(message.response).length > 0">-->
+<!--          <h4 class="section-title">Suggested Actions</h4>-->
+<!--          <div class="cta-buttons">-->
+<!--            <button-->
+<!--              *ngFor="let cta of getCTAItemsFromMessage(message.response)"-->
+<!--              class="cta-button"-->
+<!--              (click)="onCTAClick(cta)">-->
+<!--              {{ cta.name }}-->
+<!--            </button>-->
+<!--          </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Video Links Section - THIS WAS MISSING &ndash;&gt;-->
+<!--        <div class="video-section" *ngIf="getVideoLinksFromMessage(message.response).length > 0">-->
+<!--          <h4 class="section-title">Related Videos</h4>-->
+<!--          <div class="video-grid">-->
+<!--            <div-->
+<!--              *ngFor="let video of getVideoLinksFromMessage(message.response)"-->
+<!--              class="video-item"-->
+<!--              (click)="onVideoClick(video)">-->
+<!--              <div class="video-thumbnail">-->
+<!--                <i class="play-icon">▶</i>-->
+<!--                <span class="video-name">{{ video.name }}</span>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Usage Information (Optional) &ndash;&gt;-->
+<!--        <div class="usage-info" *ngIf="message.response.usages && showUsageInfo">-->
+<!--          <details class="usage-details">-->
+<!--            <summary>Usage Details</summary>-->
+<!--            <div class="usage-content">-->
+<!--              <span class="usage-item">Input Tokens: {{ message.response.usages.inputtoken }}</span>-->
+<!--              <span class="usage-item">Output Tokens: {{ message.response.usages.outputtikem }}</span>-->
+<!--              <span class="usage-item">Cost: ${{ message.response.usages.cost.toFixed(4) }}</span>-->
+<!--              <span class="usage-item">Duration: {{ message.response.usages.duration }}ms</span>-->
+<!--              <span class="usage-item" *ngIf="message.response.usages.isEstimated">-->
+<!--                <em>(Estimated)</em>-->
+<!--              </span>-->
+<!--            </div>-->
+<!--          </details>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Loading indicator &ndash;&gt;-->
+<!--    <div *ngIf="isLoading" class="loading-message">-->
+<!--      <div class="message-bubble assistant-bubble">-->
+<!--        <div class="typing-indicator">-->
+<!--          <span></span>-->
+<!--          <span></span>-->
+<!--          <span></span>-->
+<!--        </div>-->
+<!--        <span class="loading-text">Thinking...</span>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+
+<!--  &lt;!&ndash; Chat Controls &ndash;&gt;-->
+<!--  <div class="chat-controls" *ngIf="messages.length > 0">-->
+<!--    <button (click)="clearChat()" class="control-button" title="Clear Chat">-->
+<!--      🗑️ Clear-->
+<!--    </button>-->
+<!--    <button (click)="retryLastMessage()" class="control-button" title="Retry Last Message" [disabled]="isLoading">-->
+<!--      🔄 Retry-->
+<!--    </button>-->
+<!--    <button (click)="toggleUsageInfo()" class="control-button" title="Toggle Usage Info" [class.active]="showUsageInfo">-->
+<!--      📊 Usage-->
+<!--    </button>-->
+<!--  </div>-->
+
+<!--  &lt;!&ndash; Chat Input Section &ndash;&gt;-->
+<!--  <div class="chat-input-section">-->
+<!--    <div class="input-wrapper">-->
+<!--      <input-->
+<!--        #messageInput-->
+<!--        type="text"-->
+<!--        [(ngModel)]="currentMessage"-->
+<!--        (keyup.enter)="sendMessage()"-->
+<!--        (input)="onInputChange()"-->
+<!--        placeholder="Type your message..."-->
+<!--        class="message-input"-->
+<!--        [disabled]="isLoading"-->
+<!--        autocomplete="off">-->
+
+<!--      &lt;!&ndash; Auto-completion suggestions &ndash;&gt;-->
+<!--      <div class="suggestions" *ngIf="suggestions.length > 0">-->
+<!--        <div-->
+<!--          *ngFor="let suggestion of suggestions"-->
+<!--          class="suggestion-item"-->
+<!--          (click)="selectSuggestion(suggestion)">-->
+<!--          {{ suggestion }}-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    <button-->
+<!--      (click)="sendMessage()"-->
+<!--      [disabled]="!currentMessage.trim() || isLoading"-->
+<!--      class="send-button">-->
+<!--      <span *ngIf="!isLoading">Send</span>-->
+<!--      <span *ngIf="isLoading" class="loading-spinner">⟳</span>-->
+<!--    </button>-->
+<!--  </div>-->
+
+<!--  &lt;!&ndash; Video Player Modal - MOVED OUTSIDE OF MESSAGE LOOP &ndash;&gt;-->
+<!--  <div class="video-modal" *ngIf="showVideoPlayer && selectedVideo" (click)="closeVideoPlayer()">-->
+<!--    <div class="video-modal-content" (click)="$event.stopPropagation()">-->
+<!--      <div class="video-header">-->
+<!--        <h3>{{ selectedVideo.name }}</h3>-->
+<!--        <button class="close-button" (click)="closeVideoPlayer()">&times;</button>-->
+<!--      </div>-->
+<!--      <div class="video-container">-->
+<!--        &lt;!&ndash; YouTube iframe for YouTube videos - Using sanitized URL &ndash;&gt;-->
+<!--        <iframe-->
+<!--          *ngIf="isYouTubeVideo(selectedVideo.value)"-->
+<!--          [src]="getYouTubeEmbedUrl(selectedVideo.value)"-->
+<!--          frameborder="0"-->
+<!--          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"-->
+<!--          allowfullscreen>-->
+<!--        </iframe>-->
+
+<!--        &lt;!&ndash; Regular video tag for other video formats - Using sanitized URL &ndash;&gt;-->
+<!--        <video-->
+<!--          *ngIf="!isYouTubeVideo(selectedVideo.value)"-->
+<!--          controls-->
+<!--          width="100%"-->
+<!--          height="100%">-->
+<!--          <source [src]="getSafeVideoUrl(selectedVideo.value)" type="video/mp4">-->
+<!--          <source [src]="getSafeVideoUrl(selectedVideo.value)" type="video/webm">-->
+<!--          <source [src]="getSafeVideoUrl(selectedVideo.value)" type="video/ogg">-->
+<!--          Your browser does not support the video tag.-->
+<!--        </video>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</div>-->
+
+<!-- New Input Section -->
 <div class="chat-assistant-container">
   <!-- Empty State -->
   <div class="empty-state" *ngIf="messages.length === 0 && !isLoading">
@@ -20,10 +188,21 @@
 
       <!-- Assistant Message -->
       <div *ngIf="!message.isUser && message.response" class="assistant-message">
-        <div class="message-bubble assistant-bubble">
-          <p>{{ message.response.response }}</p>
-          <span class="timestamp">{{ formatTime(message.timestamp) }}</span>
+        <!-- Display each message part as a separate bubble if multiple parts exist -->
+        <div *ngIf="message.messageParts && message.messageParts.length > 1; else singleMessageBubble">
+          <div *ngFor="let part of message.messageParts; let isLast = last" class="message-bubble assistant-bubble">
+            <p [innerHTML]="getSafeHtml(part)"></p>
+            <span class="timestamp" *ngIf="isLast">{{ formatTime(message.timestamp) }}</span>
+          </div>
         </div>
+
+        <!-- Single message bubble template -->
+        <ng-template #singleMessageBubble>
+          <div class="message-bubble assistant-bubble">
+            <p [innerHTML]="getSafeHtml(message.response.response)"></p>
+            <span class="timestamp">{{ formatTime(message.timestamp) }}</span>
+          </div>
+        </ng-template>
 
         <!-- CTA Buttons Section -->
         <div class="cta-section" *ngIf="getCTAItemsFromMessage(message.response).length > 0">
@@ -32,20 +211,25 @@
             <button
               *ngFor="let cta of getCTAItemsFromMessage(message.response)"
               class="cta-button"
-              (click)="onCTAClick(cta)">
+              (click)="onCTAClick(cta)"
+              [attr.aria-label]="'Action: ' + cta.name">
               {{ cta.name }}
             </button>
           </div>
         </div>
 
-        <!-- Video Links Section - THIS WAS MISSING -->
+        <!-- Video Links Section -->
         <div class="video-section" *ngIf="getVideoLinksFromMessage(message.response).length > 0">
           <h4 class="section-title">Related Videos</h4>
           <div class="video-grid">
             <div
               *ngFor="let video of getVideoLinksFromMessage(message.response)"
               class="video-item"
-              (click)="onVideoClick(video)">
+              (click)="onVideoClick(video)"
+              [attr.aria-label]="'Play video: ' + video.name"
+              tabindex="0"
+              (keydown.enter)="onVideoClick(video)"
+              (keydown.space)="onVideoClick(video)">
               <div class="video-thumbnail">
                 <i class="play-icon">▶</i>
                 <span class="video-name">{{ video.name }}</span>
@@ -87,13 +271,28 @@
 
   <!-- Chat Controls -->
   <div class="chat-controls" *ngIf="messages.length > 0">
-    <button (click)="clearChat()" class="control-button" title="Clear Chat">
+    <button
+      (click)="clearChat()"
+      class="control-button"
+      title="Clear Chat"
+      [disabled]="isLoading"
+      aria-label="Clear all chat messages">
       🗑️ Clear
     </button>
-    <button (click)="retryLastMessage()" class="control-button" title="Retry Last Message" [disabled]="isLoading">
+    <button
+      (click)="retryLastMessage()"
+      class="control-button"
+      title="Retry Last Message"
+      [disabled]="isLoading"
+      aria-label="Retry the last message">
       🔄 Retry
     </button>
-    <button (click)="toggleUsageInfo()" class="control-button" title="Toggle Usage Info" [class.active]="showUsageInfo">
+    <button
+      (click)="toggleUsageInfo()"
+      class="control-button"
+      title="Toggle Usage Info"
+      [class.active]="showUsageInfo"
+      aria-label="Toggle usage information display">
       📊 Usage
     </button>
   </div>
@@ -106,18 +305,33 @@
         type="text"
         [(ngModel)]="currentMessage"
         (keyup.enter)="sendMessage()"
+        (keydown)="onKeyDown($event)"
         (input)="onInputChange()"
+        (blur)="suggestions = []"
         placeholder="Type your message..."
         class="message-input"
         [disabled]="isLoading"
-        autocomplete="off">
+        autocomplete="off"
+        aria-label="Type your message"
+        [attr.aria-describedby]="suggestions.length > 0 ? 'suggestions-list' : null">
 
       <!-- Auto-completion suggestions -->
-      <div class="suggestions" *ngIf="suggestions.length > 0">
+      <div
+        class="suggestions"
+        *ngIf="suggestions.length > 0"
+        id="suggestions-list"
+        role="listbox"
+        aria-label="Message suggestions">
         <div
-          *ngFor="let suggestion of suggestions"
+          *ngFor="let suggestion of suggestions; let i = index"
           class="suggestion-item"
-          (click)="selectSuggestion(suggestion)">
+          (click)="selectSuggestion(suggestion)"
+          [attr.aria-label]="'Suggestion: ' + suggestion"
+          [attr.id]="'suggestion-' + i"
+          role="option"
+          tabindex="0"
+          (keydown.enter)="selectSuggestion(suggestion)"
+          (keydown.space)="selectSuggestion(suggestion)">
           {{ suggestion }}
         </div>
       </div>
@@ -126,18 +340,32 @@
     <button
       (click)="sendMessage()"
       [disabled]="!currentMessage.trim() || isLoading"
-      class="send-button">
+      class="send-button"
+      [attr.aria-label]="isLoading ? 'Sending message...' : 'Send message'">
       <span *ngIf="!isLoading">Send</span>
-      <span *ngIf="isLoading" class="loading-spinner">⟳</span>
+      <span *ngIf="isLoading" class="loading-spinner" aria-hidden="true">⟳</span>
     </button>
   </div>
 
-  <!-- Video Player Modal - MOVED OUTSIDE OF MESSAGE LOOP -->
-  <div class="video-modal" *ngIf="showVideoPlayer && selectedVideo" (click)="closeVideoPlayer()">
-    <div class="video-modal-content" (click)="$event.stopPropagation()">
+  <!-- Video Player Modal -->
+  <div class="video-modal"
+    *ngIf="showVideoPlayer && selectedVideo"
+    (click)="closeVideoPlayer()"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="'Video player for: ' + selectedVideo.name"
+    (keydown.escape)="closeVideoPlayer()">
+    <div
+      class="video-modal-content"
+      (click)="$event.stopPropagation()"
+      role="document">
       <div class="video-header">
         <h3>{{ selectedVideo.name }}</h3>
-        <button class="close-button" (click)="closeVideoPlayer()">&times;</button>
+        <button
+          class="close-button"
+          (click)="closeVideoPlayer()"
+          aria-label="Close video player"
+          title="Close">&times;</button>
       </div>
       <div class="video-container">
         <!-- YouTube iframe for YouTube videos - Using sanitized URL -->
@@ -146,7 +374,8 @@
           [src]="getYouTubeEmbedUrl(selectedVideo.value)"
           frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen>
+          allowfullscreen
+          [attr.title]="selectedVideo.name">
         </iframe>
 
         <!-- Regular video tag for other video formats - Using sanitized URL -->
@@ -154,7 +383,8 @@
           *ngIf="!isYouTubeVideo(selectedVideo.value)"
           controls
           width="100%"
-          height="100%">
+          height="100%"
+          [attr.aria-label]="selectedVideo.name">
           <source [src]="getSafeVideoUrl(selectedVideo.value)" type="video/mp4">
           <source [src]="getSafeVideoUrl(selectedVideo.value)" type="video/webm">
           <source [src]="getSafeVideoUrl(selectedVideo.value)" type="video/ogg">
